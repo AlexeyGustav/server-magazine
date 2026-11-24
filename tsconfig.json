@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",          // какой JS генерировать
+    "module": "ESNext",          // работа с ES-модулями (import/export)
+    "moduleResolution": "bundler",
+    "strict": true,              // строгий режим — ловим больше ошибок
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "noEmit": true,              // мы не компилируем в файлы, tsx запускает сразу
+    "types": ["node"]            // подключаем типы node:http, Buffer и т.д.
+  },
+  "include": ["src"]
+}
