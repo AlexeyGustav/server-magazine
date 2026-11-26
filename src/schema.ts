@@ -26,7 +26,7 @@ export const typeDefs = `#graphql
     description: String!
     text: String!
     oldPrice: String
-    newPrice: String!
+    newPrice: String
     additional: String      # метка: "Скидка" | "Новинка" | "Хит"
     material: [String!]!
     color: [String!]!

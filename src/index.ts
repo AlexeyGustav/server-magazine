@@ -1,7 +1,9 @@
 import { createServer, type IncomingMessage } from "node:http";
+import { Server } from "socket.io";
 import { buildSchema, graphql } from "graphql";
 import { typeDefs } from "./schema";
 import { resolvers } from "./resolvers";
+import { add, cart, decrement, remove, clear } from "./cart";
 
 const schema = buildSchema(typeDefs);
 
@@ -19,7 +21,7 @@ function readBody(req: IncomingMessage): Promise<string> {
 
 const server = createServer(async (req, res) => {
   // Лог каждого входящего запроса
-  console.log(`\n📥 ${req.method} ${req.url}`);
+  // console.log(`\n📥 ${req.method} ${req.url}`);
 
   // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -70,7 +72,6 @@ const server = createServer(async (req, res) => {
   try {
     const { query, variables } = JSON.parse(await readBody(req));
 
-    console.log(query);
     if (variables && Object.keys(variables).length > 0) {
       console.log("переменные:", JSON.stringify(variables, null, 2));
     }
@@ -93,6 +94,45 @@ const server = createServer(async (req, res) => {
     res.end(JSON.stringify({ errors: [{ message: String(e) }] }));
   }
 });
+
+const io = new Server(server, { cors: { origin: "*" } });
+
+io.on("connection", (socket) => {
+  console.log("клиент подключился", io.engine.clientsCount);
+  socket.emit("cart-updated", cart);
+
+  socket.on("cart:add", (payload: { id: number }) => {
+    add(payload.id);
+    io.emit("cart-updated", cart);
+    console.log("cart:add", payload);
+  });
+
+  socket.on("cart:plus", (payload: { id: number }) => {
+    add(payload.id);
+    io.emit("cart-updated", cart);
+    console.log("cart:plus", payload);
+  });
+
+  socket.on("cart:minus", (payload: { id: number }) => {
+    decrement(payload.id);
+    io.emit("cart-updated", cart);
+    console.log("cart:minus", payload);
+  });
+
+  socket.on("cart:remove", (payload: { id: number }) => {
+    remove(payload.id);
+    io.emit("cart-updated", cart);
+    console.log("cart:remove", payload);
+  });
+
+  socket.on("cart:clear", (payload) => {
+    clear();
+    io.emit("cart-updated", cart);
+    console.log("cart:clear");
+  });
+});
+
+
 
 server.listen(4000, () => {
   console.log("🚀 GraphQL-сервер запущен: http://localhost:4000");

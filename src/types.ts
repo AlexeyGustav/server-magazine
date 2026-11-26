@@ -27,7 +27,7 @@ export interface Product {
   description: string;
   text: string;
   oldPrice: string | null;
-  newPrice: string;
+  newPrice: string | null;
   additional: string | null;
   material: string[];
   color: string[];
@@ -39,4 +39,9 @@ export interface CatalogData {
   categories: string[];
   filters: Filters;
   products: Product[];
+}
+
+export interface CartItem {
+  id: number;
+  quantity: number;
 }
